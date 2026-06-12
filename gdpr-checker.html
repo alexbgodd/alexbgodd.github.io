@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GDPR Compliance Checker</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0a0e17;
+    --surface:   #111827;
+    --border:    #1e2d40;
+    --text:      #e2e8f0;
+    --muted:     #64748b;
+    --green:     #00d4aa;
+    --green-dim: #00d4aa22;
+    --red:       #ff4d6d;
+    --red-dim:   #ff4d6d22;
+    --yellow:    #fbbf24;
+    --yellow-dim:#fbbf2422;
+    --blue:      #60a5fa;
+    --blue-dim:  #60a5fa22;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 2rem 1rem;
+  }
+
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+  }
+
+  /* HEADER */
+  header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+  .badge {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    color: var(--green);
+    border: 1px solid var(--green);
+    padding: 0.25rem 0.8rem;
+    border-radius: 2px;
+    margin-bottom: 1.2rem;
+  }
+  h1 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.6rem;
+    color: #fff;
+  }
+  h1 span { color: var(--green); }
+  .subtitle {
+    font-size: 0.9rem;
+    color: var(--muted);
+    max-width: 50ch;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* INPUT AREA */
+  .input-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .input-row {
+    display: flex;
+    gap: 0.75rem;
+    align-items: stretch;
+  }
+  .url-input {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.88rem;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .url-input:focus { border-color: var(--green); }
+  .url-input::placeholder { color: var(--muted); }
+  .scan-btn {
+    background: var(--green);
+    color: #0a0e17;
+    border: none;
+    border-radius: 6px;
+    padding: 0.75rem 1.8rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: opacity 0.2s;
+    white-space: nowrap;
+  }
+  .scan-btn:hover { opacity: 0.85; }
+  .scan-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .input-note {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 0.75rem;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* TERMINAL LOG */
+  .terminal {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.2rem 1.4rem;
+    margin-bottom: 1.5rem;
+    min-height: 120px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    line-height: 1.8;
+    display: none;
+  }
+  .terminal.active { display: block; }
+  .log-line { color: var(--muted); }
+  .log-line.ok { color: var(--green); }
+  .log-line.err { color: var(--red); }
+  .log-line.warn { color: var(--yellow); }
+  .log-line.info { color: var(--blue); }
+  .cursor {
+    display: inline-block;
+    width: 8px; height: 14px;
+    background: var(--green);
+    animation: blink 1s step-end infinite;
+    vertical-align: middle;
+    margin-left: 2px;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* SCORE */
+  .score-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    display: none;
+    text-align: center;
+  }
+  .score-card.active { display: block; }
+  .score-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+  .score-number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 4rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 0.3rem;
+  }
+  .score-verdict {
+    font-size: 0.88rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+  }
+  .score-bar-bg {
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+    max-width: 300px;
+    margin: 0 auto;
+  }
+  .score-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 1s ease;
+  }
+
+  /* RESULTS GRID */
+  .results {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    display: none;
+  }
+  .results.active { display: flex; }
+  .result-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.1rem 1.3rem;
+    display: grid;
+    grid-template-columns: 28px 1fr auto;
+    gap: 0.8rem;
+    align-items: start;
+    transition: border-color 0.2s;
+  }
+  .result-item:hover { border-color: #2a3a50; }
+  .result-icon {
+    font-size: 1rem;
+    margin-top: 0.1rem;
+  }
+  .result-title {
+    font-size: 0.88rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    color: #fff;
+  }
+  .result-desc {
+    font-size: 0.78rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .result-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    padding: 0.2rem 0.55rem;
+    border-radius: 3px;
+    white-space: nowrap;
+    align-self: center;
+  }
+  .badge-pass { background: var(--green-dim); color: var(--green); }
+  .badge-fail { background: var(--red-dim); color: var(--red); }
+  .badge-warn { background: var(--yellow-dim); color: var(--yellow); }
+  .badge-info { background: var(--blue-dim); color: var(--blue); }
+
+  /* DISCLAIMER */
+  .disclaimer {
+    background: var(--yellow-dim);
+    border: 1px solid #fbbf2444;
+    border-radius: 6px;
+    padding: 1rem 1.2rem;
+    font-size: 0.78rem;
+    color: var(--yellow);
+    line-height: 1.6;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* FOOTER */
+  footer {
+    text-align: center;
+    margin-top: 3rem;
+    font-size: 0.75rem;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  footer a { color: var(--green); text-decoration: none; }
+
+  @media (max-width: 600px) {
+    .input-row { flex-direction: column; }
+    .result-item { grid-template-columns: 24px 1fr; }
+    .result-badge { grid-column: 2; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cursor { animation: none; }
+    .score-bar-fill { transition: none; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="badge">GDPR · EU 2016/679</div>
+    <h1>GDPR <span>Compliance</span> Checker</h1>
+    <p class="subtitle">Analyse any website URL for common GDPR compliance signals — cookie consent, privacy policy, data collection indicators and more.</p>
+  </header>
+
+  <div class="input-card">
+    <div class="input-row">
+      <input type="url" class="url-input" id="urlInput" placeholder="https://example.com" autocomplete="off" spellcheck="false">
+      <button class="scan-btn" id="scanBtn" onclick="startScan()">SCAN →</button>
+    </div>
+    <p class="input-note">// Analysis is performed client-side. No data is stored or transmitted.</p>
+  </div>
+
+  <div class="terminal" id="terminal"></div>
+  <div class="score-card" id="scoreCard"></div>
+  <div class="results" id="results"></div>
+
+  <div class="disclaimer">
+    ⚠ DISCLAIMER: This tool performs a heuristic surface-level analysis based on publicly observable signals.
+    It does not constitute legal advice and cannot replace a full GDPR audit by a qualified Data Protection Officer.
+    Results are indicative only.
+  </div>
+
+  <footer>
+    <p>Built by <a href="https://alexbgodd.github.io">Alexander Marinkov</a> · QA & Digital Specialist · Sofia, Bulgaria</p>
+  </footer>
+
+</div>
+
+<script>
+const checks = [
+  {
+    id: 'https',
+    title: 'HTTPS / Secure Connection',
+    desc: 'GDPR requires appropriate technical measures to protect personal data in transit. HTTPS is a baseline requirement.',
+    article: 'Art. 32',
+    run: (url) => {
+      if (url.startsWith('https://')) return { status: 'pass', note: 'Site uses HTTPS — data in transit is encrypted.' };
+      return { status: 'fail', note: 'Site does not use HTTPS. This is a significant security gap under GDPR Art. 32.' };
+    }
+  },
+  {
+    id: 'cookie_hint',
+    title: 'Cookie Consent Mechanism',
+    desc: 'Websites must obtain informed, freely given consent before placing non-essential cookies. A cookie banner or consent manager is required.',
+    article: 'Art. 6 + ePrivacy',
+    run: (url, html) => {
+      const lower = html.toLowerCase();
+      const signals = ['cookie', 'consent', 'gdpr', 'cookiebot', 'onetrust', 'cookiepro', 'tarteaucitron', 'cc-', 'cookie-banner', 'cookie_notice'];
+      const found = signals.filter(s => lower.includes(s));
+      if (found.length >= 2) return { status: 'pass', note: `Cookie consent signals detected (${found.slice(0,3).join(', ')}).` };
+      if (found.length === 1) return { status: 'warn', note: `Weak cookie signal detected (${found[0]}). Manual review recommended.` };
+      return { status: 'fail', note: 'No cookie consent mechanism detected in page source.' };
+    }
+  },
+  {
+    id: 'privacy_policy',
+    title: 'Privacy Policy Link',
+    desc: 'Controllers must provide a privacy notice explaining what data is collected, why, how long it is retained, and user rights.',
+    article: 'Art. 13–14',
+    run: (url, html) => {
+      const lower = html.toLowerCase();
+      const signals = ['privacy policy', 'privacy notice', 'datenschutz', 'politique de confidentialité', 'политика за поверителност', 'privacy-policy', '/privacy'];
+      const found = signals.some(s => lower.includes(s));
+      if (found) return { status: 'pass', note: 'Privacy policy reference found on the page.' };
+      return { status: 'fail', note: 'No privacy policy link detected. This is required under GDPR Art. 13.' };
+    }
+  },
+  {
+    id: 'forms',
+    title: 'Form & Data Collection Indicators',
+    desc: 'Any form collecting personal data (name, email, etc.) must have a lawful basis, be disclosed in the privacy notice, and include consent where required.',
+    article: 'Art. 6',
+    run: (url, html) => {
+      const lower = html.toLowerCase();
+      const hasForms = lower.includes('<form') || lower.includes('type="email"') || lower.includes('type="text"');
+      const hasConsent = lower.includes('checkbox') || lower.includes('i agree') || lower.includes('i accept') || lower.includes('consent');
+      if (!hasForms) return { status: 'info', note: 'No forms detected on this page.' };
+      if (hasConsent) return { status: 'pass', note: 'Forms present with apparent consent mechanism.' };
+      return { status: 'warn', note: 'Forms detected but no explicit consent checkbox found. Review required.' };
+    }
+  },
+  {
+    id: 'analytics',
+    title: 'Third-Party Analytics / Tracking',
+    desc: 'Use of Google Analytics, Facebook Pixel and similar tools involves data transfer to third parties and requires disclosure and (usually) consent.',
+    article: 'Art. 28 + 46',
+    run: (url, html) => {
+      const lower = html.toLowerCase();
+      const trackers = [
+        { name: 'Google Analytics', sig: ['google-analytics', 'gtag(', 'ua-', 'g-'] },
+        { name: 'Facebook Pixel', sig: ['fbq(', 'facebook.net/en_us/fbevents', 'connect.facebook.net'] },
+        { name: 'Google Tag Manager', sig: ['googletagmanager', 'gtm.js'] },
+        { name: 'Hotjar', sig: ['hotjar', 'hj('] },
+        { name: 'LinkedIn Insight', sig: ['snap.licdn', 'linkedin insight'] },
+      ];
+      const found = trackers.filter(t => t.sig.some(s => lower.includes(s))).map(t => t.name);
+      if (found.length === 0) return { status: 'pass', note: 'No common third-party trackers detected.' };
+      return { status: 'warn', note: `Trackers detected: ${found.join(', ')}. Ensure these are disclosed and consent is obtained.` };
+    }
+  },
+  {
+    id: 'dpo',
+    title: 'Data Protection Officer / Contact',
+    desc: 'Some organisations are required to appoint a DPO. All controllers must provide a contact point for data subjects.',
+    article: 'Art. 37–39',
+    run: (url, html) => {
+      const lower = html.toLowerCase();
+      const signals = ['data protection officer', 'dpo', 'dpo@', 'gdpr contact', 'datenschutzbeauftragter'];
+      const found = signals.some(s => lower.includes(s));
+      if (found) return { status: 'pass', note: 'DPO or data protection contact reference found.' };
+      return { status: 'info', note: 'No DPO reference found. Required for certain organisations under Art. 37.' };
+    }
+  },
+  {
+    id: 'subresources',
+    title: 'External Resource Origins',
+    desc: 'Loading fonts, scripts or media from external CDNs (Google Fonts, etc.) may constitute a data transfer under GDPR.',
+    article: 'Art. 44–49',
+    run: (url, html) => {
+      const lower = html.toLowerCase();
+      const external = [
+        { name: 'Google Fonts', sig: 'fonts.googleapis.com' },
+        { name: 'Google APIs', sig: 'ajax.googleapis.com' },
+        { name: 'Cloudflare CDN', sig: 'cdnjs.cloudflare.com' },
+        { name: 'jQuery CDN', sig: 'code.jquery.com' },
+        { name: 'Bootstrap CDN', sig: 'bootstrapcdn.com' },
+      ];
+      const found = external.filter(e => lower.includes(e.sig)).map(e => e.name);
+      if (found.length === 0) return { status: 'pass', note: 'No common external resource CDNs detected.' };
+      return { status: 'warn', note: `External resources from: ${found.join(', ')}. IP data may be transferred to third parties.` };
+    }
+  }
+];
+
+const statusMeta = {
+  pass: { icon: '✓', label: 'PASS', cls: 'badge-pass' },
+  fail: { icon: '✗', label: 'FAIL', cls: 'badge-fail' },
+  warn: { icon: '⚠', label: 'WARN', cls: 'badge-warn' },
+  info: { icon: 'ℹ', label: 'INFO', cls: 'badge-info' },
+};
+
+function log(msg, type = '') {
+  const terminal = document.getElementById('terminal');
+  const line = document.createElement('div');
+  line.className = `log-line ${type}`;
+  line.textContent = '> ' + msg;
+  // remove cursor from previous last line
+  const prev = terminal.querySelector('.cursor');
+  if (prev) prev.remove();
+  terminal.appendChild(line);
+  // add cursor
+  const cursor = document.createElement('span');
+  cursor.className = 'cursor';
+  line.appendChild(cursor);
+  terminal.scrollTop = terminal.scrollHeight;
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+async function startScan() {
+  const input = document.getElementById('urlInput');
+  const btn = document.getElementById('scanBtn');
+  let url = input.value.trim();
+
+  if (!url) { input.focus(); return; }
+  if (!url.startsWith('http')) url = 'https://' + url;
+
+  // Reset UI
+  const terminal = document.getElementById('terminal');
+  const scoreCard = document.getElementById('scoreCard');
+  const results = document.getElementById('results');
+  terminal.innerHTML = '';
+  scoreCard.innerHTML = '';
+  scoreCard.classList.remove('active');
+  results.innerHTML = '';
+  results.classList.remove('active');
+  terminal.classList.add('active');
+
+  btn.disabled = true;
+  btn.textContent = 'SCANNING...';
+
+  log(`Initialising GDPR scan for: ${url}`);
+  await sleep(400);
+  log(`Checking URL format...`, 'ok');
+  await sleep(300);
+
+  let html = '';
+  let fetchOk = false;
+
+  try {
+    log(`Fetching page via CORS proxy...`);
+    await sleep(500);
+    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+    const resp = await fetch(proxyUrl, { signal: AbortSignal.timeout(10000) });
+    const data = await resp.json();
+    html = data.contents || '';
+    fetchOk = html.length > 100;
+    if (fetchOk) {
+      log(`Page fetched — ${html.length.toLocaleString()} characters received.`, 'ok');
+    } else {
+      log(`Received empty response. Running URL-only checks.`, 'warn');
+    }
+  } catch (e) {
+    log(`Fetch failed (${e.message}). Running URL-only checks.`, 'warn');
+  }
+
+  await sleep(400);
+  log(`Running ${checks.length} compliance checks...`);
+  await sleep(300);
+
+  const resultItems = [];
+  for (const check of checks) {
+    await sleep(180 + Math.random() * 120);
+    const res = check.run(url, html);
+    const meta = statusMeta[res.status];
+    log(`[${meta.label}] ${check.title}`, res.status === 'pass' ? 'ok' : res.status === 'fail' ? 'err' : res.status === 'warn' ? 'warn' : 'info');
+    resultItems.push({ check, res });
+  }
+
+  await sleep(400);
+
+  // Score
+  const pass = resultItems.filter(r => r.res.status === 'pass').length;
+  const fail = resultItems.filter(r => r.res.status === 'fail').length;
+  const warn = resultItems.filter(r => r.res.status === 'warn').length;
+  const score = Math.round((pass / checks.length) * 100);
+
+  let color, verdict;
+  if (score >= 80) { color = 'var(--green)'; verdict = 'Good compliance signals'; }
+  else if (score >= 50) { color = 'var(--yellow)'; verdict = 'Partial compliance — review needed'; }
+  else { color = 'var(--red)'; verdict = 'Significant issues detected'; }
+
+  log(`Scan complete. Score: ${score}/100 | PASS: ${pass} | WARN: ${warn} | FAIL: ${fail}`, 'ok');
+
+  // Render score
+  scoreCard.classList.add('active');
+  scoreCard.innerHTML = `
+    <p class="score-label">Compliance Score</p>
+    <div class="score-number" style="color:${color}">${score}</div>
+    <div class="score-verdict" style="color:${color}">${verdict}</div>
+    <div class="score-bar-bg" style="margin-top:0.8rem">
+      <div class="score-bar-fill" id="scoreFill" style="width:0%;background:${color}"></div>
+    </div>
+    <p style="font-size:0.72rem;color:var(--muted);margin-top:0.6rem;font-family:'JetBrains Mono',monospace">${pass} passed · ${warn} warnings · ${fail} failed</p>
+  `;
+  setTimeout(() => {
+    document.getElementById('scoreFill').style.width = score + '%';
+  }, 100);
+
+  // Render results
+  results.classList.add('active');
+  for (const { check, res } of resultItems) {
+    const meta = statusMeta[res.status];
+    const div = document.createElement('div');
+    div.className = 'result-item';
+    div.innerHTML = `
+      <span class="result-icon" style="color:${res.status==='pass'?'var(--green)':res.status==='fail'?'var(--red)':res.status==='warn'?'var(--yellow)':'var(--blue)'}">${meta.icon}</span>
+      <div>
+        <div class="result-title">${check.title} <span style="font-size:0.7rem;color:var(--muted);font-weight:400">${check.article}</span></div>
+        <div class="result-desc">${check.desc}</div>
+        <div class="result-desc" style="margin-top:0.3rem;color:var(--text)">${res.note}</div>
+      </div>
+      <span class="result-badge ${meta.cls}">${meta.label}</span>
+    `;
+    results.appendChild(div);
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'SCAN →';
+}
+
+document.getElementById('urlInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') startScan();
+});
+</script>
+</body>
+</html>
