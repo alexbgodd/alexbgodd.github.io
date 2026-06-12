@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alexander Marinkov — Portfolio</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink:       #0f0f0f;
+    --paper:     #f7f5f0;
+    --mid:       #6b6560;
+    --rule:      #d8d4ce;
+    --accent:    #2a6dd9;
+    --accent-bg: #eef3fc;
+    --critical:  #c0392b;
+    --mono:      'JetBrains Mono', monospace;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 2rem;
+    height: 56px;
+    background: rgba(247,245,240,0.92);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--rule);
+  }
+  .nav-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.05rem;
+    letter-spacing: 0.01em;
+  }
+  .nav-links { display: flex; gap: 1.8rem; list-style: none; }
+  .nav-links a {
+    font-size: 0.8rem; font-weight: 500; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--mid); text-decoration: none;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--ink); }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    padding: 7rem 4rem 4rem;
+    gap: 3rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .hero-label {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1.2rem;
+  }
+  .hero h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(2.8rem, 5vw, 4.2rem);
+    line-height: 1.08;
+    margin-bottom: 0.5rem;
+  }
+  .hero h1 em {
+    font-style: italic;
+    color: var(--mid);
+  }
+  .hero-sub {
+    font-size: 1.05rem;
+    color: var(--mid);
+    max-width: 38ch;
+    margin: 1.2rem 0 2rem;
+    line-height: 1.7;
+  }
+  .hero-cta {
+    display: inline-flex; gap: 1rem; flex-wrap: wrap;
+  }
+  .btn {
+    display: inline-block;
+    padding: 0.7rem 1.6rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .btn-primary {
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .btn-primary:hover { background: #333; }
+  .btn-outline {
+    border: 1.5px solid var(--rule);
+    color: var(--ink);
+  }
+  .btn-outline:hover { border-color: var(--ink); }
+
+  /* hero right: skill grid */
+  .hero-skills {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .skill-cell {
+    background: var(--paper);
+    padding: 1.4rem 1.2rem;
+    transition: background 0.2s;
+  }
+  .skill-cell:hover { background: var(--accent-bg); }
+  .skill-cell .icon { font-size: 1.4rem; margin-bottom: 0.5rem; }
+  .skill-cell h3 { font-size: 0.85rem; font-weight: 600; margin-bottom: 0.2rem; }
+  .skill-cell p { font-size: 0.75rem; color: var(--mid); line-height: 1.4; }
+
+  /* ── SECTION WRAPPER ── */
+  .section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 5rem 4rem;
+    border-top: 1px solid var(--rule);
+  }
+  .section-label {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.6rem;
+  }
+  .section-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(1.8rem, 3vw, 2.6rem);
+    margin-bottom: 2.5rem;
+  }
+
+  /* ── EXPERIENCE ── */
+  .exp-list { display: flex; flex-direction: column; gap: 0; }
+  .exp-item {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 2rem;
+    padding: 2rem 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .exp-meta { padding-top: 0.1rem; }
+  .exp-date {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--mid);
+    margin-bottom: 0.4rem;
+  }
+  .exp-company {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .exp-role {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.7rem;
+  }
+  .exp-desc {
+    font-size: 0.88rem;
+    color: var(--mid);
+    line-height: 1.7;
+    margin-bottom: 0.8rem;
+  }
+  .exp-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .tag {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    padding: 0.2rem 0.6rem;
+    background: var(--accent-bg);
+    color: var(--accent);
+    border-radius: 3px;
+    letter-spacing: 0.04em;
+  }
+
+  /* ── QA BUGS ── */
+  .bugs-grid { display: flex; flex-direction: column; gap: 0.6rem; }
+  .bug-row {
+    display: grid;
+    grid-template-columns: 80px 120px 1fr;
+    gap: 1rem;
+    align-items: start;
+    padding: 1rem 1.2rem;
+    background: white;
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    transition: border-color 0.2s;
+  }
+  .bug-row:hover { border-color: var(--accent); }
+  .bug-severity {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    padding: 0.25rem 0.5rem;
+    border-radius: 3px;
+    text-align: center;
+    align-self: center;
+  }
+  .sev-critical { background: #fdecea; color: var(--critical); }
+  .sev-major { background: #fff4e5; color: #c07a00; }
+  .bug-id {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--mid);
+    align-self: center;
+  }
+  .bug-desc { font-size: 0.85rem; line-height: 1.5; }
+
+  /* ── SKILLS SECTION ── */
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 0.5rem;
+  }
+  .skill-tag {
+    padding: 0.6rem 0.8rem;
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-align: center;
+    transition: all 0.2s;
+    cursor: default;
+  }
+  .skill-tag:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-bg);
+  }
+
+  /* ── EDUCATION ── */
+  .edu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+  .edu-card {
+    padding: 1.4rem;
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+  }
+  .edu-card h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.3rem; }
+  .edu-card p { font-size: 0.82rem; color: var(--mid); }
+
+  /* ── CONTACT ── */
+  .contact-row {
+    display: flex; flex-wrap: wrap; gap: 1rem; align-items: center;
+  }
+  .contact-item {
+    display: flex; align-items: center; gap: 0.5rem;
+    font-size: 0.88rem; color: var(--mid);
+  }
+  .contact-item a { color: var(--ink); text-decoration: none; font-weight: 500; }
+  .contact-item a:hover { color: var(--accent); }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--rule);
+    padding: 2rem 4rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.78rem;
+    color: var(--mid);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .hero { grid-template-columns: 1fr; padding: 6rem 1.5rem 3rem; }
+    .hero-skills { display: none; }
+    .section { padding: 3rem 1.5rem; }
+    .exp-item { grid-template-columns: 1fr; gap: 0.5rem; }
+    .bug-row { grid-template-columns: 70px 1fr; }
+    .bug-id { display: none; }
+    footer { flex-direction: column; gap: 0.5rem; padding: 1.5rem; text-align: center; }
+    nav { padding: 0 1rem; }
+    .nav-links { gap: 1rem; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="nav-name">Alexander Marinkov</span>
+  <ul class="nav-links">
+    <li><a href="#experience">Experience</a></li>
+    <li><a href="#qa">QA Work</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div>
+    <p class="hero-label">Available for remote work</p>
+    <h1>Content, QA<br>&amp; <em>Digital</em><br>Specialist</h1>
+    <p class="hero-sub">I build and test digital products — from video content and WordPress sites to manual QA with documented bug reports and real-world impact.</p>
+    <div class="hero-cta">
+      <a href="#experience" class="btn btn-primary">View Experience</a>
+      <a href="#contact" class="btn btn-outline">Get in Touch</a>
+    </div>
+  </div>
+  <div class="hero-skills">
+    <div class="skill-cell">
+      <div class="icon">🎬</div>
+      <h3>Video Production</h3>
+      <p>Adobe Premiere Pro, Reels, Shorts, colour grading</p>
+    </div>
+    <div class="skill-cell">
+      <div class="icon">🔍</div>
+      <h3>Manual QA</h3>
+      <p>Bug reporting, regression, cross-browser, UX testing</p>
+    </div>
+    <div class="skill-cell">
+      <div class="icon">⚙️</div>
+      <h3>WordPress & CMS</h3>
+      <p>Site management, plugins, content publishing</p>
+    </div>
+    <div class="skill-cell">
+      <div class="icon">✍️</div>
+      <h3>Copywriting & SEO</h3>
+      <p>News writing, email campaigns, social content</p>
+    </div>
+    <div class="skill-cell">
+      <div class="icon">🎨</div>
+      <h3>Visual Design</h3>
+      <p>Photoshop, Canva, book covers, print design</p>
+    </div>
+    <div class="skill-cell">
+      <div class="icon">🤖</div>
+      <h3>AI & Emerging Tech</h3>
+      <p>AI tools, data annotation, no-code automation</p>
+    </div>
+  </div>
+</section>
+
+<!-- EXPERIENCE -->
+<section class="section" id="experience">
+  <p class="section-label">Career</p>
+  <h2 class="section-title">Experience</h2>
+  <div class="exp-list">
+
+    <div class="exp-item">
+      <div class="exp-meta">
+        <p class="exp-date">Feb 2023 – Apr 2024</p>
+        <p class="exp-company">Scandinavian Alliance</p>
+        <p class="exp-date" style="margin-top:0.3rem">Remote</p>
+      </div>
+      <div>
+        <h3 class="exp-role">QA & Web Operations / Digital Content Manager</h3>
+        <p class="exp-desc">Conducted exploratory and functional manual testing on a live social networking platform. Documented 12+ bugs with full reproduction steps, severity ratings and video evidence — including 6 critical issues affecting video upload, scheduling and platform stability. In parallel, managed WordPress sites, produced short-form video for social media and delivered Mailchimp email campaigns.</p>
+        <div class="exp-tags">
+          <span class="tag">Manual Testing</span>
+          <span class="tag">Bug Reporting</span>
+          <span class="tag">WordPress</span>
+          <span class="tag">Premiere Pro</span>
+          <span class="tag">Mailchimp</span>
+          <span class="tag">Photoshop</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="exp-item">
+      <div class="exp-meta">
+        <p class="exp-date">Oct 2021 – Jul 2022</p>
+        <p class="exp-company">TV Sofia</p>
+      </div>
+      <div>
+        <h3 class="exp-role">News Editor & Web Administrator</h3>
+        <p class="exp-desc">Wrote, edited and published news content to daily deadlines. Managed content scheduling and validated site updates for accuracy and visual consistency prior to publication.</p>
+        <div class="exp-tags">
+          <span class="tag">News Writing</span>
+          <span class="tag">CMS</span>
+          <span class="tag">Content QA</span>
+          <span class="tag">Social Media</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="exp-item">
+      <div class="exp-meta">
+        <p class="exp-date">Oct 2016 – Mar 2020</p>
+        <p class="exp-company">HR Dev Centre</p>
+      </div>
+      <div>
+        <h3 class="exp-role">Web Administrator & Content Editor</h3>
+        <p class="exp-desc">Managed digital platforms for an NGO, ensuring accuracy, accessibility and visual consistency. Conducted content quality checks and coordinated fixes with technical staff.</p>
+        <div class="exp-tags">
+          <span class="tag">Web Admin</span>
+          <span class="tag">Accessibility</span>
+          <span class="tag">Content Strategy</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- QA BUGS -->
+<section class="section" id="qa">
+  <p class="section-label">QA Portfolio</p>
+  <h2 class="section-title">Bug Report Highlights</h2>
+  <p style="font-size:0.88rem;color:var(--mid);margin-bottom:1.8rem;max-width:60ch">Selected from a real QA engagement on a live social networking platform (May–September 2023). Full report with reproduction steps, environment details and video evidence available on request.</p>
+  <div class="bugs-grid">
+    <div class="bug-row">
+      <span class="bug-severity sev-critical">CRITICAL</span>
+      <span class="bug-id">BUG-MM-003</span>
+      <span class="bug-desc">Post scheduling ignores time when video is attached — posts publish immediately. Affected all video-based scheduled content. Raised and tracked May–Sep 2023.</span>
+    </div>
+    <div class="bug-row">
+      <span class="bug-severity sev-critical">CRITICAL</span>
+      <span class="bug-id">BUG-MM-006</span>
+      <span class="bug-desc">Site crash on 4K/2K video upload. No file size limits shown in UI. Reproduced 3× with screen recording and sample files provided to dev team.</span>
+    </div>
+    <div class="bug-row">
+      <span class="bug-severity sev-critical">CRITICAL</span>
+      <span class="bug-id">BUG-GP-002</span>
+      <span class="bug-desc">Video uploaded to Group/Page published to user's general profile — a serious UX and privacy issue. Confirmed across both modules, escalated to developers.</span>
+    </div>
+    <div class="bug-row">
+      <span class="bug-severity sev-major">MAJOR</span>
+      <span class="bug-id">BUG-MM-001</span>
+      <span class="bug-desc">Video player missing landscape fullscreen on mobile (Android/iOS). Standard feature across all major platforms — pending third-party player integration.</span>
+    </div>
+    <div class="bug-row">
+      <span class="bug-severity sev-major">MAJOR</span>
+      <span class="bug-id">BUG-GP-001</span>
+      <span class="bug-desc">Page edit dashboard scrolls to top on mobile after any click — user loses context. Confirmed on all mobile browsers.</span>
+    </div>
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section class="section" id="skills">
+  <p class="section-label">Capabilities</p>
+  <h2 class="section-title">Skills</h2>
+  <div class="skills-grid">
+    <div class="skill-tag">Manual Testing</div>
+    <div class="skill-tag">Exploratory Testing</div>
+    <div class="skill-tag">Regression Testing</div>
+    <div class="skill-tag">Bug Reporting</div>
+    <div class="skill-tag">UX / Usability Testing</div>
+    <div class="skill-tag">Cross-browser Testing</div>
+    <div class="skill-tag">Mobile Testing</div>
+    <div class="skill-tag">Video QA</div>
+    <div class="skill-tag">WordPress & CMS</div>
+    <div class="skill-tag">Adobe Premiere Pro</div>
+    <div class="skill-tag">Photoshop & Canva</div>
+    <div class="skill-tag">SEO & Copywriting</div>
+    <div class="skill-tag">Mailchimp</div>
+    <div class="skill-tag">Social Media Strategy</div>
+    <div class="skill-tag">Print Design</div>
+    <div class="skill-tag">AI Tools</div>
+    <div class="skill-tag">Google Workspace</div>
+    <div class="skill-tag">No-code Automation</div>
+  </div>
+
+  <div style="margin-top:3rem">
+    <p class="section-label">Education</p>
+    <div class="edu-grid">
+      <div class="edu-card">
+        <h3>BA in Bulgarian Philology</h3>
+        <p>Sofia University · 2004–2010</p>
+      </div>
+      <div class="edu-card">
+        <h3>Digital Marketing</h3>
+        <p>SoftUni, Sofia · Completed</p>
+      </div>
+      <div class="edu-card">
+        <h3>Video Editing — Adobe Premiere Pro</h3>
+        <p>Online course · Completed</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="section" id="contact">
+  <p class="section-label">Get in touch</p>
+  <h2 class="section-title">Contact</h2>
+  <div class="contact-row">
+    <div class="contact-item">
+      <span>✉️</span>
+      <a href="mailto:alexbgodd@gmail.com">alexbgodd@gmail.com</a>
+    </div>
+    <div class="contact-item">
+      <span>📞</span>
+      <a href="tel:+359889447843">+359 889 447 843</a>
+    </div>
+    <div class="contact-item">
+      <span>📍</span>
+      <span>Sofia, Bulgaria</span>
+    </div>
+    <div class="contact-item">
+      <span>🌐</span>
+      <span>Available for remote work globally</span>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span>© 2025 Alexander Marinkov</span>
+  <span>Sofia, Bulgaria · Remote</span>
+</footer>
+
+</body>
+</html>
